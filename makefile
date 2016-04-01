@@ -2,10 +2,25 @@ CC= gcc
 CFLAGS= -g -Wall -Wextra
 LDFLAGS= -lm
 
-default:
-	$(CC) $(CFLAGS) -c war.h war.c
-	$(CC) $(CFLAGS) -c game.c
-	$(CC) $(CFLAGS) -o game war.o game.c
+INC=\
+	war.h\
+	brigade.h\
+	weapon.h\
+	random.h\
+	utility.h\
+
+SRC=\
+	war.c\
+	brigade.c\
+	weapon.c\
+	random.c\
+	utility.c\
+	game.c
+
+OBJ=$(SRC:.c=.o)
+
+default: $(OBJ)
+	$(CC) $(CFLAGS) -o game $(OBJ)
 
 clean:
-	-rm -f game *.o *.gch
+	-rm -f game $(OBJ) *.gch

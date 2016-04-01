@@ -1,13 +1,5 @@
 #include "war.h"
 
-#include <assert.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-
 void combat(Territory* territory, Brigade* attackers, uint32_t attacker_count, Brigade* defenders, uint32_t defender_count);
 
 int main()
@@ -15,19 +7,19 @@ int main()
     Brigade usa[3];
     Brigade ger[2];
    
-    create_brigade(&usa[0], brigade_infantry);
-    create_brigade(&usa[1], brigade_infantry);
-    create_brigade(&usa[2], brigade_artillery);
+    brigade_create(&usa[0], brigade_infantry);
+    brigade_create(&usa[1], brigade_infantry);
+    brigade_create(&usa[2], brigade_artillery);
     
-    create_brigade(&ger[0], brigade_infantry);
-    create_brigade(&ger[1], brigade_infantry);
+    brigade_create(&ger[0], brigade_infantry);
+    brigade_create(&ger[1], brigade_infantry);
 
     printf("United States 1st Infantry Division:\n");
-    describe_brigade(&usa[0]);
+    brigade_debug(&usa[0]);
     printf("\n");
-    describe_brigade(&usa[1]);
+    brigade_debug(&usa[1]);
     printf("\n");
-    describe_brigade(&usa[2]);
+    brigade_debug(&usa[2]);
     printf("\n");
 
     Territory plains;
@@ -50,47 +42,19 @@ int main()
     return 0;
 }
 
-bool brigade_is_frontline(const Brigade* ptr)
-{
-    // brigades that are too disorganized or
-    // are support brigades will not hold a front
-    if(ptr->type == brigade_infantry)
-    {
-        if(ptr->organization > 0)
-            return true;
-    }
-    return false;
-}
-
-uint32_t get_random(uint32_t min, uint32_t max)
-{
-    return (rand() % (max-min)) + min;
-}
-
-uint32_t min(uint32_t a, uint32_t b)
-{
-    if(a<b)
-        return a;
-    return b;
-}
-
-uint32_t max(uint32_t a, uint32_t b)
-{
-    if(a<b)
-        return b;
-    return a;
-}
-
 void combat(Territory* territory, Brigade* attackers, uint32_t attacker_count, Brigade* defenders, uint32_t defender_count)
 {
     uint32_t hour = 0;
 
     uint32_t attack_start_distance = 0;
+    
+    RandomGen random;
+    randomgen_create(&random, 31415);
 
     // compute the max distance of any defending unit
     for(uint32_t ii=0; ii<defender_count; ++ii)
     {
-        attack_start_distance = max(attack_start_distance, brigade_range(&defenders[ii]));
+        attack_start_distance = umax(attack_start_distance, brigade_calculate_range(&defenders[ii]));
     }
     printf("The attackers will start at a distance of %u meters\n", attack_start_distance);
 
@@ -150,7 +114,7 @@ void combat(Territory* territory, Brigade* attackers, uint32_t attacker_count, B
             {
                 printf("The defending %s %s brigade is too disorganized to attack.\n", 
                         ordinal_number(defenders[ii].id),
-                        BrigadeStrings[defenders[ii].type]
+                        brigade_get_type_name(defenders[ii].type)
                 );
             }
             else // the brigade can attack
@@ -163,12 +127,12 @@ void combat(Territory* territory, Brigade* attackers, uint32_t attacker_count, B
                 if(brigade_is_frontline(&defenders[ii]))
                 {
                     // front line divisions can only target other front line divisions
-                    uint32_t victim_id = get_random(0, e_attack_count);
+                    uint32_t victim_id = randomgen_get_range_uint(&random, 0, e_attack_count);
                     victim = e_attack[victim_id];
                 }
                 else
                 {
-                    uint32_t victim_id = get_random(0, attacker_count);
+                    uint32_t victim_id = randomgen_get_range_uint(&random, 0, attacker_count);
                     victim = &attackers[victim_id];
                 }
                 
