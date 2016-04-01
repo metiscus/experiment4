@@ -2,13 +2,6 @@ CC= gcc
 CFLAGS= -g -Wall -Wextra -MD
 LDFLAGS= -lm
 
-INC=\
-	war.h\
-	brigade.h\
-	weapon.h\
-	random.h\
-	utility.h\
-
 SRC=\
 	war.c\
 	brigade.c\
