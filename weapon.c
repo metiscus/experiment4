@@ -1,7 +1,9 @@
 #include "weapon.h"
 #include "utility.h"
+#include <assert.h>
+#include <stdint.h>
 
-const char *WeaponStrings[]
+static const char *WeaponStrings[]
 = {
     "Unarmed",
     "Infanry Rifle",
@@ -9,7 +11,7 @@ const char *WeaponStrings[]
     "Howitzer"
 };
 
-const char *AmmoStrings[]
+static const char *AmmoStrings[]
 = {
     "Bullet",
     "HE Mortar Round",
@@ -47,7 +49,18 @@ void ammo_create(Ammo* ptr, AmmoType type)
             ptr->radius = 1000;
             ptr->pierce = 100;
             break;
+        case ammo_count:
+        default:
+            assert(0);
+            break;
     }
+}
+
+const char* ammo_get_type_name(AmmoType type)
+{
+    assert(type > ammo_first);
+    assert(type < ammo_count);
+    return AmmoStrings[(uint32_t)type];
 }
 
 void weapon_create(Weapon* ptr, WeaponType type)
@@ -77,6 +90,11 @@ void weapon_create(Weapon* ptr, WeaponType type)
             ammo_create(&ptr->ammo[0], ammo_howitzer_he);
             ammo_create(&ptr->ammo[1], ammo_howitzer_at);
             break;
+
+        case weapon_count:
+        default:
+            assert(0);
+            break;
     }
 }
 
@@ -86,4 +104,11 @@ uint32_t weapon_get_range(WeaponType type)
     weapon_create(&wpn, type);
 
     return umax(wpn.ammo[0].range, wpn.ammo[1].range);
+}
+
+const char* weapon_get_type_name(WeaponType type)
+{
+    assert(type > weapon_first);
+    assert(type < weapon_count);
+    return WeaponStrings[(uint32_t)type];
 }

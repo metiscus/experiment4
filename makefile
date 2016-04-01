@@ -1,5 +1,5 @@
 CC= gcc
-CFLAGS= -g -Wall -Wextra
+CFLAGS= -g -Wall -Wextra -MD
 LDFLAGS= -lm
 
 INC=\
@@ -23,4 +23,6 @@ default: $(OBJ)
 	$(CC) $(CFLAGS) -o game $(OBJ)
 
 clean:
-	-rm -f game $(OBJ) *.gch
+	-rm -f game $(OBJ) *.d *.gch
+
+-include *.d

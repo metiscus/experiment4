@@ -28,6 +28,7 @@ typedef struct Brigade
     uint32_t morale;
     uint32_t experience;
     uint32_t dug_in;
+    uint32_t speed; // km/h
 } Brigade;
 
 

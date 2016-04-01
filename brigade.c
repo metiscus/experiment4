@@ -44,6 +44,7 @@ void brigade_create(Brigade* ptr, BrigadeType type)
             ptr->organization  = 100;
             ptr->morale        = 100;
             ptr->experience    = 0;
+            ptr->speed         = 5;
             break;
 
         case brigade_artillery:
@@ -56,13 +57,13 @@ void brigade_create(Brigade* ptr, BrigadeType type)
             ptr->organization  = 100;
             ptr->morale        = 100;
             ptr->experience    = 0;
+            ptr->speed         = 2;
             break;
         case brigade_count:
         default:
             assert(0);
             break;
     }
-
 }
 
 void brigade_debug(Brigade *ptr)
@@ -72,10 +73,10 @@ void brigade_debug(Brigade *ptr)
     printf("Supplies: %d\n", ptr->supplies); // each troop needs 1 supply per day to fight
     printf("Weapons:\n");
     // each troop needs a weapon to fight
-    printf("\t%s : %d\n", WeaponStrings[ptr->weapon_type], ptr->weapon_count);
+    printf("\t%s : %d\n", weapon_get_type_name(ptr->weapon_type), ptr->weapon_count);
     if(ptr->support_type != weapon_none)
     {
-        printf("\t%s : %d\n", WeaponStrings[ptr->support_type], ptr->support_count);
+        printf("\t%s : %d\n", weapon_get_type_name(ptr->support_type), ptr->support_count);
     }
     printf("Dug in: %s\n", (ptr->dug_in > 0) ? "Yes" : "No");
     printf("Organization: %d\n", ptr->organization);
