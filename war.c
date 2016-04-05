@@ -68,13 +68,13 @@ bool combat_round(CombatInfo *info)
                 // front line divisions can only target other front line divisions
                 uint32_t victim_id = randomgen_get_range_uint(info->generator, 0, e_attack_count);
                 victim = e_attack[victim_id];
-                printf("DDD victim id: %u\n", victim_id);
+                //printf("DDD victim id: %u\n", victim_id);
             }
             else
             {
                 uint32_t victim_id = randomgen_get_range_uint(info->generator, 0, info->attacker_count);
                 victim = info->attackers[victim_id];
-                printf("DDD victim id: %u\n", victim_id);
+                //printf("DDD victim id: %u\n", victim_id);
             }
             
             implement_tactic(info, info->defenders[ii], victim);
@@ -103,13 +103,13 @@ bool combat_round(CombatInfo *info)
                 // front line divisions can only target other front line divisions
                 uint32_t victim_id = randomgen_get_range_uint(info->generator, 0, e_defend_count);
                 victim = e_defend[victim_id];
-                printf("AAA victim id: %u\n", victim_id);
+                //printf("AAA victim id: %u\n", victim_id);
             }
             else
             {
                 uint32_t victim_id = randomgen_get_range_uint(info->generator, 0, info->defender_count);
                 victim = info->defenders[victim_id];
-                printf("AAA victim id: %u\n", victim_id);
+                //printf("AAA victim id: %u\n", victim_id);
             }
             
             implement_tactic(info, info->attackers[ii], victim);
@@ -153,7 +153,7 @@ static uint32_t calculate_support_hits(CombatInfo* info, Brigade* ptr, Brigade* 
     //printf("max hits: %u\n", max_hits);
     ptr->supplies = umin(ptr->supplies - max_hits, ptr->supplies);
 
-    uint32_t min_hits = umax((ptr->experience / 10.0f) * max_hits, 0);
+    uint32_t min_hits = umax((ptr->experience / 100.0f) * max_hits, 0);
 
     if(max_hits == 0)
         return 0;
@@ -162,28 +162,73 @@ static uint32_t calculate_support_hits(CombatInfo* info, Brigade* ptr, Brigade* 
     
 }
 
+static float get_victim_power_ratio(Tactic tactic)
+{
+    switch(tactic)
+    {
+        case tactic_attack:
+        case tactic_attack_assault:
+            return 1.0;
+            break;
+        case tactic_attack_scout:
+            return 0.25f;
+            break;
+        case tactic_attack_retreat:
+            return 1.0f;
+            break;
+        case tactic_defend:
+            return 0.85f;
+            break;
+        case tactic_defend_delay:
+            return 0.24f;
+            break;
+        case tactic_defend_hold:
+            return 1.0f;
+            break;
+        case tactic_defend_retreat:
+            return 1.0f;
+        default:
+            assert(0);
+            break;
+    }
+}
+
 static void implement_tactic(CombatInfo *info, Brigade* ptr, Brigade* victim)
 {
     assert(info);
     assert(ptr);
+    
+    bool is_night = false;
+    if(info->hour < 8 || info->hour > 20)
+    {
+        is_night = true;
+    }
 
     float power_ratio = 1.0f;
     float org_ratio = 1.0f;
+    
+    if(is_night)
+    {
+        //printf("Night time penalizes all combat\n");
+        power_ratio = 0.1f;
+        org_ratio   = 0.2f;
+    }
+
     int32_t motion_dir = 0;
     switch(ptr->tactic)
     {
         case tactic_attack:
-            org_ratio = 0.75f;
+            org_ratio *= 0.75f;
             motion_dir = 1;
             break;
         case tactic_attack_assault:
-            power_ratio = 1.0f;
-            org_ratio = 0.6f;
+            power_ratio *= 1.0f;
+            org_ratio *= 0.6f;
             motion_dir = 1;
             break;
         case tactic_attack_scout:
-            power_ratio = 0.25f;
-            org_ratio = 0.2f;
+            power_ratio *= 0.25f;
+            org_ratio *= 0.2f;
             motion_dir = 1;
             break;
         case tactic_attack_retreat:
@@ -191,18 +236,18 @@ static void implement_tactic(CombatInfo *info, Brigade* ptr, Brigade* victim)
             return;
             break;
         case tactic_defend:
-            org_ratio = 0.7f;
-            power_ratio = 0.85f;
+            org_ratio *= 0.7f;
+            power_ratio *= 0.85f;
             motion_dir = 0;
             break;
         case tactic_defend_delay:
-            org_ratio = 0.18f;
-            power_ratio = 0.24f;
+            org_ratio *= 0.18f;
+            power_ratio *= 0.24f;
             motion_dir = 0;
             break;
         case tactic_defend_hold:
-            org_ratio = 0.95f;
-            power_ratio = 1.0f;
+            org_ratio *= 0.95f;
+            power_ratio *= 1.0f;
             motion_dir = 0;
             break;
         case tactic_defend_retreat:
@@ -219,6 +264,9 @@ static void implement_tactic(CombatInfo *info, Brigade* ptr, Brigade* victim)
     if(fabs(distance) <= weapon_get_range(ptr->weapon_type))
     {
         uint32_t troop_hits = calculate_troop_hits(info, ptr, victim, power_ratio);
+
+        troop_hits *= get_victim_power_ratio(victim->tactic);
+
         printf("%s hit %s for %u casualties by %s.\n",
             brigade_get_name(ptr),
             brigade_get_name(victim),
@@ -228,7 +276,7 @@ static void implement_tactic(CombatInfo *info, Brigade* ptr, Brigade* victim)
         
         victim->troops       = umin(victim->troops - troop_hits, victim->troops);
         victim->organization = umin( victim->organization - (org_ratio * troop_hits / 100.0f), victim->organization);
-        ptr->experience     += sqrtf(troop_hits / 100);
+        ptr->experience     += sqrtf(troop_hits / 10000.0f);
     }
     else
     {
@@ -238,11 +286,13 @@ static void implement_tactic(CombatInfo *info, Brigade* ptr, Brigade* victim)
         {
             printf("%s moves %d to %d\n", brigade_get_name(ptr), distance_moved, ptr->distance);
         }
+        return;
     }
     
     if(fabs(distance) <= weapon_get_range(ptr->support_type))
     {
         uint32_t troop_hits = calculate_support_hits(info, ptr, victim, power_ratio);
+        troop_hits *= get_victim_power_ratio(victim->tactic);
         printf("%s hit %s for %u casualties by %s.\n",
             brigade_get_name(ptr),
             brigade_get_name(victim),
@@ -252,15 +302,13 @@ static void implement_tactic(CombatInfo *info, Brigade* ptr, Brigade* victim)
         
         victim->troops       = umin(victim->troops - troop_hits, victim->troops);
         victim->organization = umin( victim->organization - (org_ratio * troop_hits / 100.0f), victim->organization);
-        ptr->experience     += sqrtf(troop_hits / 100);
+        ptr->experience     += sqrtf(troop_hits / 10000.0f);
     }
 
 }
 
 void combat(CombatInfo *info)
 {
-    uint32_t hour = 0;
-
     int32_t attack_start_distance = 0;
 
     // compute the max distance of any defending unit
@@ -293,6 +341,21 @@ void combat(CombatInfo *info)
             defense_strength += sqrt(info->defenders[ii]->troops * info->defenders[ii]->organization);
         }
 
+        // hack to supply a little supply to each brigade every day
+        if(info->hour % 24 == 0)
+        {
+            for(uint32_t ii=0; ii<info->attacker_count; ++ii)
+            {
+                info->attackers[ii]->supplies += 10000;
+            }
+            for(uint32_t ii=0; ii<info->defender_count; ++ii)
+            {
+                info->defenders[ii]->supplies += 10000;
+            }
+            
+            info->hour = 0;
+        }
+
         printf("Attacker effective strength: %u\n", attack_strength);
         printf("Defender effective strength: %u\n", defense_strength);
 
@@ -306,18 +369,18 @@ void combat(CombatInfo *info)
             }
             else if(attack_strength > 2 * defense_strength)
             {
-                printf("%s will assault.\n", brigade_get_name(info->attackers[ii]));
-                info->attackers[ii]->tactic = tactic_attack_assault;
+//                printf("%s will assault.\n", brigade_get_name(info->attackers[ii]));
+//                info->attackers[ii]->tactic = tactic_attack_assault;
             }
             else if(attack_strength < defense_strength)
             {
-                printf("%s will scout.\n", brigade_get_name(info->attackers[ii]));
-                info->attackers[ii]->tactic = tactic_attack_scout;
+//                printf("%s will scout.\n", brigade_get_name(info->attackers[ii]));
+//                info->attackers[ii]->tactic = tactic_attack_scout;
             }
             else
             {
-                printf("%s will attack.\n", brigade_get_name(info->attackers[ii]));
-                info->attackers[ii]->tactic = tactic_attack;
+//                printf("%s will attack.\n", brigade_get_name(info->attackers[ii]));
+//                info->attackers[ii]->tactic = tactic_attack;
             }
         }
 
@@ -341,16 +404,28 @@ void combat(CombatInfo *info)
             }
             else
             {
-                printf("%s will defend.\n", brigade_get_name(info->defenders[ii]));
-                info->defenders[ii]->tactic = tactic_defend;
+//                printf("%s will defend.\n", brigade_get_name(info->defenders[ii]));
+//                info->defenders[ii]->tactic = tactic_defend;
             }
         }
     
-        printf("Combat hour: %d\n", ++hour);
-        combat_round(info);
+        printf("Combat hour: %d\n", ++info->hour);
+        continue_combat &= combat_round(info);
         
         static int x = 0;
         if(++x > 50)
             break;
+    }
+    
+    printf("attackers:\n");
+    for(uint32_t ii=0; ii<info->attacker_count; ++ii)
+    {
+        brigade_debug(info->attackers[ii]);
+    }
+
+    printf("defenders:\n");
+    for(uint32_t ii=0; ii<info->defender_count; ++ii)
+    {
+        brigade_debug(info->defenders[ii]);
     }
 }

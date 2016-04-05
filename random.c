@@ -19,7 +19,20 @@ uint64_t randomgen_get(RandomGen* ptr)
 uint64_t randomgen_get_range_uint(RandomGen* ptr, uint64_t min, uint64_t max)
 {
     assert(ptr);
-    assert(min < max);
+
+    if(min > max)
+    {
+        uint64_t tmp = max;
+        max = min;
+        min = tmp;
+//        assert(0);
+    }
+
+    if(min==max)
+    {
+        return min;
+    }
+
     return xorshift64star(&ptr->seed) % (max-min) + min;
 }
 

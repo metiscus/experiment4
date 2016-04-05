@@ -37,6 +37,7 @@ typedef struct CombatInfo
     Brigade** defenders;
     uint32_t defender_count;
     RandomGen *generator;
+    uint32_t hour;
 } CombatInfo;
 
 extern void combat(CombatInfo *info);

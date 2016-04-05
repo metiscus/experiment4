@@ -82,7 +82,7 @@ void brigade_debug(Brigade *ptr)
     printf("Dug in: %s\n", (ptr->dug_in > 0) ? "Yes" : "No");
     printf("Organization: %d\n", ptr->organization);
     printf("Morale: %d\n", ptr->morale);
-    printf("Experience: %d\n", ptr->experience);
+    printf("Experience: %f\n", ptr->experience);
 }
 
 bool brigade_is_frontline(const Brigade* ptr)
