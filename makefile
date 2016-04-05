@@ -13,7 +13,7 @@ SRC=\
 OBJ=$(SRC:.c=.o)
 
 default: $(OBJ)
-	$(CC) $(CFLAGS) -o game $(OBJ)
+	$(CC) $(CFLAGS) -o game $(OBJ) -lm
 
 clean:
 	-rm -f game $(OBJ) *.d *.gch

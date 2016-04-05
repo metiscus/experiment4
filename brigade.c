@@ -17,11 +17,11 @@ void brigade_create(Brigade* ptr, BrigadeType type)
     const WeaponType   InfantryBrigade_DefaultWeapon = weapon_rifle;
     const WeaponType   InfantryBrigade_DefaultSupport = weapon_mortar;
     const uint32_t InfantryBrigade_DefaultSupportCount = 25;
-    const uint32_t InfantryBrigade_DefaultSupplies = InfantryBrigade_DefaultStrength * 2;
+    const uint32_t InfantryBrigade_DefaultSupplies = InfantryBrigade_DefaultStrength * 8;
 
     const uint32_t SupportBrigade_DefaultStrength = 1500;
     const WeaponType   SupportBrigade_DefaultWeapon = weapon_rifle;
-    const uint32_t SupportBrigade_DefaultSupplies = InfantryBrigade_DefaultStrength * 2;
+    const uint32_t SupportBrigade_DefaultSupplies = InfantryBrigade_DefaultStrength * 8;
    
     static uint32_t brigade_id = 0;
 
@@ -68,6 +68,7 @@ void brigade_create(Brigade* ptr, BrigadeType type)
 
 void brigade_debug(Brigade *ptr)
 {
+    assert(ptr);
     printf("%s %s\n", ordinal_number(ptr->id), BrigadeStrings[ptr->type]);
     printf("Strength: %d\n", ptr->troops);
     printf("Supplies: %d\n", ptr->supplies); // each troop needs 1 supply per day to fight
@@ -86,6 +87,7 @@ void brigade_debug(Brigade *ptr)
 
 bool brigade_is_frontline(const Brigade* ptr)
 {
+    assert(ptr);
     // brigades that are too disorganized or
     // are support brigades will not hold a front
     if(ptr->type == brigade_infantry)
@@ -98,6 +100,7 @@ bool brigade_is_frontline(const Brigade* ptr)
 
 uint32_t brigade_calculate_range(const Brigade* ptr)
 {
+    assert(ptr);
     Weapon weapons[2];
     weapon_create(&weapons[0], ptr->weapon_type);
     weapon_create(&weapons[1], ptr->support_type);
@@ -113,7 +116,42 @@ uint32_t brigade_calculate_range(const Brigade* ptr)
 
 const char* brigade_get_type_name(BrigadeType type)
 {
-    assert(type > brigade_first);
+    assert(type >= brigade_first);
     assert(type < brigade_count);
     return BrigadeStrings[(uint32_t)type];
+}
+
+const char* brigade_get_name(Brigade* ptr)
+{
+    assert(ptr);
+    if(!ptr->name)
+    {
+        char buffer[1000];
+        sprintf(buffer, "%s %s brigade",
+            ordinal_number(ptr->id),
+            brigade_get_type_name(ptr->type)
+        );
+        ptr->name = strdup(buffer);
+    }
+    return ptr->name;
+}
+
+uint32_t brigade_get_troop_width(BrigadeType type)
+{
+    assert(type >= brigade_first);
+    assert(type < brigade_count);
+    switch(type)
+    {
+        case brigade_infantry:
+            return 1;
+            break;
+        case brigade_artillery:
+            return 3;
+            break;
+        case brigade_count:
+        default:
+            assert(0);
+            return 0;
+            break;
+    }
 }

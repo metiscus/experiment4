@@ -6,7 +6,7 @@
 static const char *WeaponStrings[]
 = {
     "Unarmed",
-    "Infanry Rifle",
+    "Infantry Rifle",
     "Mortar",
     "Howitzer"
 };
