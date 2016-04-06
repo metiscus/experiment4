@@ -1,0 +1,25 @@
+include("weapon.h")
+
+
+ammo ammo_unarmed
+{
+    name: "Unarmed"
+    range: 0
+    radius: 0
+    pierce: 0
+}
+
+ammo ammo_bullet
+{
+    name: "Bullet"
+    range: 1000
+    radius: 1
+    pierce: 10
+}
+
+ammo ammo_he_mortar
+{
+    name: "HE Mortar Round"
+    range: 1814
+    pierce: 20
+}

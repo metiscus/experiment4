@@ -9,7 +9,8 @@ SRC=\
 	random.c\
 	utility.c\
 	game.c\
-	territory.c
+	territory.c\
+	lexer.c\
 
 OBJ=$(SRC:.c=.o)
 

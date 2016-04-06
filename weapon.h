@@ -9,7 +9,7 @@ typedef enum WeaponType
     weapon_rifle,
     weapon_mortar,
     weapon_howitzer,
-    
+ 
     weapon_count
 } WeaponType;
 
@@ -39,7 +39,6 @@ typedef struct Weapon
     uint32_t range;         // meters
     Ammo ammo[MaxAmmo];
 } Weapon;
-
 
 extern void        ammo_create(Ammo* ptr, AmmoType type);
 extern const char* ammo_get_type_name(AmmoType type);
