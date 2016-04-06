@@ -8,26 +8,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "territory.h"
 #include "brigade.h"
 #include "random.h"
 #include "utility.h"
 #include "weapon.h"
-
-typedef enum TerrainType
-{
-    terrain_plains,
-    terrain_hills,
-    terrain_mountains
-} TerrainType;
-
-typedef struct Territory
-{
-    uint32_t id;
-    TerrainType terrain;
-    uint32_t width;      // km
-    char *name;
-} Territory;
-
 
 typedef struct CombatInfo
 {

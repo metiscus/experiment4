@@ -59,11 +59,7 @@ int main()
     printf("\n");
 
     Territory plains;
-    plains.id = 0;
-    plains.terrain = terrain_plains;
-    plains.width = 5;
-    plains.name = strdup("Atton");
-
+    territory_create(&plains, terrain_plains, "Atton");
 
     RandomGen random;
     randomgen_create(&random, 31415);

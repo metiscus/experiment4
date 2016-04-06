@@ -8,7 +8,8 @@ SRC=\
 	weapon.c\
 	random.c\
 	utility.c\
-	game.c
+	game.c\
+	territory.c
 
 OBJ=$(SRC:.c=.o)
 
