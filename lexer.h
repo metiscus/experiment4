@@ -106,6 +106,7 @@ LIMITATIONS:
         errors / warnings. But the overall handling is not very extensive.
 
 EXAMPLES:*/
+#include <string.h>
 #if 0
     /* initialize lexer */
     struct lexer_context lexer;
@@ -641,6 +642,7 @@ lexer_token_icmp(const struct lexer_token* tok, const char* str)
 LEXER_API int
 lexer_token_cmp(const struct lexer_token* tok, const char* str)
 {
+/*
     lexer_size i;
     LEXER_ASSERT(tok);
     LEXER_ASSERT(str);
@@ -652,6 +654,8 @@ lexer_token_cmp(const struct lexer_token* tok, const char* str)
     if (*str != 0 || i < tok->len)
         return 1;
     return 0;
+*/
+    return strncmp(tok->str, str, tok->len) == 0;
 }
 
 LEXER_INTERN double

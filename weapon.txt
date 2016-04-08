@@ -1,5 +1,9 @@
-include("weapon.h")
-
+type ammo
+{
+    uint32_t range;     // range in meters
+    uint32_t radius;    // damage radius in cm
+    uint32_t pierce;    // armor pierce in mm
+}
 
 ammo ammo_unarmed
 {

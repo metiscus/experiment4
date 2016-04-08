@@ -15,9 +15,10 @@ SRC=\
 OBJ=$(SRC:.c=.o)
 
 default: $(OBJ)
-	$(CC) $(CFLAGS) -o game $(OBJ) -lm
+	$(CC) $(CFLAGS) -o game $(OBJ) $(LDFLAGS)
+	$(CC) $(CFLAGS) -o parser lexer.o utility.o parse.c $(LDFLAGS)
 
 clean:
-	-rm -f game $(OBJ) *.d *.gch
+	-rm -f game parser $(OBJ) *.d *.gch
 
 -include *.d
